@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Transfer Bar Add
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  Extends Happychat Operators Script to add Operators
 // @author       joweber123
 // @match        https://hud.happychat.io/*
