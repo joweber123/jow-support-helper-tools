@@ -10,10 +10,10 @@
 
 function transferLoadCalculator(){
     let transferLoadNumArray = [];
-    document.querySelectorAll('.operators__busy').forEach((transferHEElement)=>{
+    document.querySelectorAll('.operators__busy.hasName').forEach((transferHEElement)=>{
         let transferInfoRaw = transferHEElement.firstElementChild.getAttribute('title');
         let transferLoadPos = transferInfoRaw.indexOf('Load: ');
-        var transferLoadNum = transferInfoRaw.substr(transferLoadPos+6, 1);
+        let transferLoadNum = transferInfoRaw.substr(transferLoadPos+6, 1);
         transferLoadNumArray.push(parseInt(transferLoadNum,10))
     })
     let transferLoadFinal = transferLoadNumArray.reduce((a,b) => a+b, 0)
@@ -21,10 +21,10 @@ function transferLoadCalculator(){
 }
 function transferThrottleCalculator(){
     let transferThrottleArray =[];
-    document.querySelectorAll('.operators__busy').forEach((transferHEElement)=>{
+    document.querySelectorAll('.operators__busy.hasName').forEach((transferHEElement)=>{
         let transferInfoRaw = transferHEElement.firstElementChild.getAttribute('title');
         let transferThrottlePos = transferInfoRaw.indexOf('Throttle: ');
-        var transferThrottleNum = transferInfoRaw.substr(transferThrottlePos+10, 1);
+        let transferThrottleNum = transferInfoRaw.substr(transferThrottlePos+10, 1);
         transferThrottleArray.push( parseInt(transferThrottleNum,10));
     })
     let transferThrottleFinal = transferThrottleArray.reduce((a,b) => a+b, 0)
@@ -41,6 +41,7 @@ window.setInterval(function(){
     if (transferBubble === null){
         transferBarAdd()
     }else{
-    transferBubble.innerHTML = `${transferLoadCalculator()} / ${transferThrottleCalculator()}`;
+    let transferAvailabilityCaculator = transferThrottleCalculator() - transferLoadCalculator();
+    transferBubble.innerHTML = `${transferAvailabilityCaculator} / ${transferThrottleCalculator()}`;
     }
 }, 5000);
