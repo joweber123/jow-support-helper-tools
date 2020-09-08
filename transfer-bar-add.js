@@ -8,6 +8,7 @@
 // @grant        none
 // ==/UserScript==
 
+//Calculate the load of all HEs with status as transfer
 function transferLoadCalculator(){
     let transferLoadNumArray = [];
     document.querySelectorAll('.operators__busy.hasName').forEach((transferHEElement)=>{
@@ -19,6 +20,8 @@ function transferLoadCalculator(){
     let transferLoadFinal = transferLoadNumArray.reduce((a,b) => a+b, 0)
     return transferLoadFinal;
 }
+
+//Calculate the total throttle capacity of all HEs with status as transfer
 function transferThrottleCalculator(){
     let transferThrottleArray =[];
     document.querySelectorAll('.operators__busy.hasName').forEach((transferHEElement)=>{
@@ -31,11 +34,13 @@ function transferThrottleCalculator(){
     return transferThrottleFinal
 }
 
+//Add the transfer bar as soon as the other bars are added to the page
 function transferBarAdd(){
     let reserveBubble = document.querySelector(".capacity__stats-bubble.reserve");
     reserveBubble.insertAdjacentHTML('afterend', `<span class="capacity__stats-bubble transfer" style="margin-left:4px; background: #edcd8c; border: solid 1px #ad7301;; color:rgba(0,0,0,0.8);">0 / 0</span>`);
 }
 
+//Add the transfer bar the first time, then add dynamic content on subsequent attempts
 window.setInterval(function(){
     let transferBubble = document.querySelector(".capacity__stats-bubble.transfer");
     if (transferBubble === null){
@@ -45,3 +50,4 @@ window.setInterval(function(){
     transferBubble.innerHTML = `${transferAvailabilityCaculator} / ${transferThrottleCalculator()}`;
     }
 }, 5000);
+
