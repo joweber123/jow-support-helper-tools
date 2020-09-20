@@ -47,3 +47,68 @@ window.setInterval(function(){
     }else{
     }
 }, 5000);
+
+
+const color1 = "linear-gradient(to right, #d9a7c7, #fffcdc)";
+const color2 = "linear-gradient(to right, #06beb6, #48b1bf)";
+const color3 = "linear-gradient(to right, #1c92d2, #f2fcfe)";
+
+
+window.onload = function() { // same as window.addEventListener('load', (event) => {
+    const pathOnLoad = location.pathname.split('/');
+    if (pathOnLoad[1] === 'chat' && pathOnLoad[2]) {
+        urlArrayTester();
+    }
+  };
+// Monkey patch history.pushState() so we can see URL changes in the SPA
+const pushState = history.pushState;
+history.pushState = function () {
+    pushState.apply(history, arguments);
+    getActiveChatId();
+    urlArrayTester();
+};
+
+
+function getActiveChatId() {
+    const path = location.pathname.split('/');
+    console.log(path[2]);
+}
+
+    const urlArray = [];
+    let i = 0;
+    function urlArrayTester(){
+        const path = window.location.pathname.split('/');
+        const urlEnding = path[path.length-1];
+        console.log(urlEnding);
+        const urlEndingCheck = urlArray.some(e => e.url == urlEnding);
+        if(urlEndingCheck){
+            console.log('value already exists');
+            console.log(urlArray);
+            backgroundColorChanger(urlEnding);
+        }else{
+            console.log('new value');
+            urlPusher(i, urlEnding)
+            // urlArray.push(urlEnding);
+            console.log(urlArray);
+            i<2 ? i++ : i=0;
+            backgroundColorChanger(urlEnding);
+        }
+    }
+    function urlPusher(i, urlEnding){
+        if(i == 0){
+            urlArray.push({url:`${urlEnding}`, color:`${color1}`})
+        }else if(i == 1){
+            urlArray.push({url:`${urlEnding}`, color:`${color2}`})
+        }else{
+            urlArray.push({url:`${urlEnding}`, color:`${color3}`})
+        }
+    }
+
+    function backgroundColorChanger(urlEnding){
+        console.log(urlEnding);
+        const buttonContainer = document.querySelector('.chat__current-chat');
+        const arrayElement = urlArray.find( ({ url }) => url === urlEnding );
+        console.log(arrayElement)
+        buttonContainer.style.background = arrayElement.color;
+
+}
