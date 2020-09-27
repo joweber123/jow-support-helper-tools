@@ -57,7 +57,10 @@ const color3 = "linear-gradient(to right, #1c92d2, #f2fcfe)";
 window.onload = function() { // same as window.addEventListener('load', (event) => {
     const pathOnLoad = location.pathname.split('/');
     if (pathOnLoad[1] === 'chat' && pathOnLoad[2]) {
+        console.log(pathOnLoad[1]);
+        console.log(pathOnLoad[2]);
         urlArrayTester();
+
     }
   };
 // Monkey patch history.pushState() so we can see URL changes in the SPA
@@ -111,4 +114,49 @@ function getActiveChatId() {
         console.log(arrayElement)
         buttonContainer.style.background = arrayElement.color;
 
+}
+
+//https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+window.onload = function() { // same as window.addEventListener('load', (event) => {
+    const pathOnLoad = location.pathname.split('/');
+    if (pathOnLoad[1] === 'chat' && pathOnLoad[2]) {
+        document.addEventListener( "click", someListener );
+    }
+  };
+
+
+//here you are waiting for when someone clicks the modal button.  Then the mutation observation starts to see when a childList change occurs.  Then the URLArrayTester begins.
+function someListener(event){
+    var element = event.target;
+    console.log(element);
+    console.log(element.parentElement.classList);
+    if(element.tagName == 'BUTTON'){
+        console.log('modal-is-gone');
+const targetNode = document.querySelector('.chat');
+
+// Options for the observer (which mutations to observe)
+const config = { attributes: true, childList: true, subtree: true };
+
+// Callback function to execute when mutations are observed
+const callback = function(mutationsList, observer) {
+    console.log(mutationsList);
+    // Use traditional 'for loops' for IE 11
+    for(const mutation of mutationsList) {
+        if (mutation.addedNodes[0].classList.contains("chat__chat-panels")) {
+            urlArrayTester();
+            observer.disconnect();
+            console.log('observer removed');
+            document.removeEventListener( "click", someListener );
+            console.log('click event removed');
+            return;
+        }
+    }
+};
+
+// Create an observer instance linked to the callback function
+const observer = new MutationObserver(callback);
+
+// Start observing the target node for configured mutations
+observer.observe(targetNode, config);
+    }
 }
