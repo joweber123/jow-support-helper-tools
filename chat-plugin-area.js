@@ -6,12 +6,13 @@
 // @author       joweber
 // @downloadURL  none
 // @grant        none
-// @match        http://localhost:331/*
+// @match        http://localhost:3311/*
 // @run-at document-start
 // ==/UserScript==
 
+(function() {
+    'use strict';
 
-//Add Base plugin menu item and plugin container
 function pluginAreaAddHTML(){
     const lastChatToolBarItem = document.querySelector(".chat-toolbar__menu-item:nth-child(3)");
     lastChatToolBarItem.insertAdjacentHTML('afterend', `<li id="chat-plugin-menu-item" class="chat-toolbar__menu-item"><svg class="gridicon gridicons-aside" height="18" width="18" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><g><path d="M6.09 0.63C6.02 0.79 6.02 0.82 6.02 2.43C6.03 3.65 6.03 3.98 6.01 3.97C6 3.97 5.57 3.98 5.06 3.98C4.33 3.98 4.12 3.99 4.08 4C4.05 4.02 4.02 4.05 3.98 4.09C3.94 4.15 3.93 4.16 3.93 4.22C3.92 4.3 3.94 7.05 3.94 7.23C3.95 7.59 4.01 8.03 4.1 8.37C4.33 9.25 4.76 10 5.43 10.69C5.58 10.85 6.07 11.24 6.27 11.37C6.76 11.68 7.26 11.9 7.81 12.03C7.93 12.06 7.95 12.07 7.95 12.09C7.94 12.4 7.97 16.89 7.98 16.97C8.01 17.15 8.08 17.33 8.2 17.49C8.25 17.56 8.29 17.6 8.4 17.69C8.53 17.78 8.56 17.8 8.65 17.84C8.9 17.94 9.17 17.95 9.41 17.88C9.51 17.84 9.67 17.76 9.76 17.69C9.86 17.62 10.03 17.41 10.07 17.31C10.14 17.17 10.18 17.03 10.19 16.91C10.19 16.86 10.19 15.76 10.18 14.45C10.17 13.14 10.17 12.07 10.18 12.06C10.18 12.06 10.25 12.04 10.33 12.02C11.12 11.81 11.89 11.4 12.51 10.83C12.86 10.5 13.22 10.05 13.46 9.64C13.88 8.9 14.11 8.07 14.14 7.23C14.14 6.95 14.13 4.21 14.12 4.15C14.11 4.11 14.09 4.07 14.07 4.04C13.99 3.94 14 3.94 12.97 3.94C12.46 3.95 12.03 3.95 12.03 3.94C12.02 3.94 12.02 3.25 12.01 2.41C12.01 1.56 12 0.84 11.99 0.79C11.9 0.33 11.38 0.06 10.96 0.27C10.73 0.38 10.59 0.55 10.54 0.79C10.53 0.87 10.52 1.23 10.53 2.42L10.54 3.95L10.5 3.95C10.38 3.97 7.51 3.97 7.51 3.95C7.51 3.95 7.51 3.28 7.51 2.46C7.5 1.62 7.5 0.93 7.49 0.86C7.46 0.65 7.38 0.51 7.21 0.38C7.05 0.25 6.89 0.2 6.68 0.23C6.52 0.25 6.42 0.28 6.3 0.37C6.21 0.44 6.14 0.53 6.09 0.63Z"/></g></svg>Apps</li>`);
@@ -39,7 +40,7 @@ function pluginAreaClickEvent(){
     document.addEventListener("click", pluginAreaRemoveClick );
 }
 
-//Check to see if Bookmarks menu item has loaded. When it has loaded, then add Plugin menu item
+// Check to see if Bookmarks menu item has loaded. When it has loaded, then add Plugin menu item
 window.setInterval(function(){
     const lastChatToolBarItem = document.querySelector(".chat-toolbar__menu-item:nth-child(4)");
     if (lastChatToolBarItem === null){
@@ -48,115 +49,4 @@ window.setInterval(function(){
     }
 }, 5000);
 
-
-const color1 = "linear-gradient(to right, #d9a7c7, #fffcdc)";
-const color2 = "linear-gradient(to right, #06beb6, #48b1bf)";
-const color3 = "linear-gradient(to right, #1c92d2, #f2fcfe)";
-
-
-window.onload = function() { // same as window.addEventListener('load', (event) => {
-    const pathOnLoad = location.pathname.split('/');
-    if (pathOnLoad[1] === 'chat' && pathOnLoad[2]) {
-        console.log(pathOnLoad[1]);
-        console.log(pathOnLoad[2]);
-        urlArrayTester();
-
-    }
-  };
-// Monkey patch history.pushState() so we can see URL changes in the SPA
-const pushState = history.pushState;
-history.pushState = function () {
-    pushState.apply(history, arguments);
-    getActiveChatId();
-    urlArrayTester();
-};
-
-
-function getActiveChatId() {
-    const path = location.pathname.split('/');
-    console.log(path[2]);
-}
-
-    const urlArray = [];
-    let i = 0;
-    function urlArrayTester(){
-        const path = window.location.pathname.split('/');
-        const urlEnding = path[path.length-1];
-        console.log(urlEnding);
-        const urlEndingCheck = urlArray.some(e => e.url == urlEnding);
-        if(urlEndingCheck){
-            console.log('value already exists');
-            console.log(urlArray);
-            backgroundColorChanger(urlEnding);
-        }else{
-            console.log('new value');
-            urlPusher(i, urlEnding)
-            // urlArray.push(urlEnding);
-            console.log(urlArray);
-            i<2 ? i++ : i=0;
-            backgroundColorChanger(urlEnding);
-        }
-    }
-    function urlPusher(i, urlEnding){
-        if(i == 0){
-            urlArray.push({url:`${urlEnding}`, color:`${color1}`})
-        }else if(i == 1){
-            urlArray.push({url:`${urlEnding}`, color:`${color2}`})
-        }else{
-            urlArray.push({url:`${urlEnding}`, color:`${color3}`})
-        }
-    }
-
-    function backgroundColorChanger(urlEnding){
-        console.log(urlEnding);
-        const buttonContainer = document.querySelector('.chat__current-chat');
-        const arrayElement = urlArray.find( ({ url }) => url === urlEnding );
-        console.log(arrayElement)
-        buttonContainer.style.background = arrayElement.color;
-
-}
-
-//https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-window.onload = function() { // same as window.addEventListener('load', (event) => {
-    const pathOnLoad = location.pathname.split('/');
-    if (pathOnLoad[1] === 'chat' && pathOnLoad[2]) {
-        document.addEventListener( "click", someListener );
-    }
-  };
-
-
-//here you are waiting for when someone clicks the modal button.  Then the mutation observation starts to see when a childList change occurs.  Then the URLArrayTester begins.
-function someListener(event){
-    var element = event.target;
-    console.log(element);
-    console.log(element.parentElement.classList);
-    if(element.tagName == 'BUTTON'){
-        console.log('modal-is-gone');
-const targetNode = document.querySelector('.chat');
-
-// Options for the observer (which mutations to observe)
-const config = { attributes: true, childList: true, subtree: true };
-
-// Callback function to execute when mutations are observed
-const callback = function(mutationsList, observer) {
-    console.log(mutationsList);
-    // Use traditional 'for loops' for IE 11
-    for(const mutation of mutationsList) {
-        if (mutation.addedNodes[0].classList.contains("chat__chat-panels")) {
-            urlArrayTester();
-            observer.disconnect();
-            console.log('observer removed');
-            document.removeEventListener( "click", someListener );
-            console.log('click event removed');
-            return;
-        }
-    }
-};
-
-// Create an observer instance linked to the callback function
-const observer = new MutationObserver(callback);
-
-// Start observing the target node for configured mutations
-observer.observe(targetNode, config);
-    }
-}
+})();
