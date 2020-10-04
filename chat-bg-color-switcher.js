@@ -22,27 +22,21 @@ const bgColorOptions = {
     color3: "linear-gradient(to right, #1c92d2, #f2fcfe)",
 };
 
-window.onload = function() { // same as window.addEventListener('load', (event) => {
+// on window load test local storage and update bg color if necessary
+window.onload = function(){
     const pathOnLoad = location.pathname.split('/');
     if (pathOnLoad[1] === 'chat' && pathOnLoad[2]) {
-        console.log(pathOnLoad[1]);
-        console.log(pathOnLoad[2]);
         urlArrayTester();
-
     }
   };
+
 // Monkey patch history.pushState() so we can see URL changes in the SPA
 const pushState = history.pushState;
 history.pushState = function () {
     pushState.apply(history, arguments);
-    getActiveChatId();
     urlArrayTester();
 };
 
-function getActiveChatId() {
-    const path = location.pathname.split('/');
-    console.log(path[2]);
-}
 
 //if array of chats does not exist, set to empty array.  If exists, set to local storage
 const storedChatIdsArray = JSON.parse(localStorage.getItem(`${bgColorOptions.LOCAL_STORAGE_KEY}ChatIdsObject`)) || [];
@@ -55,30 +49,26 @@ if (storedChatIdsArray.length == 0){
     i = storedChatIdsArray[storedChatIdsArray.length - 1].colorID;
 }
 
-console.log(storedChatIdsArray);
-
+//function to test if local storage entry exists or not and then add new entry if needed
 function urlArrayTester(){
     const path = window.location.pathname.split('/');
     const urlEnding = path[path.length-1];
-    console.log(urlEnding);
 
     //testing to see the current chat ID matches any IDs that are saved in the array
     const urlEndingCheck = storedChatIdsArray.some(e => e.url == urlEnding);
     if(urlEndingCheck){
-        console.log('value already exists');
-        console.log(storedChatIdsArray);
         //if the URL does match an entry, then change color accordingly.
         backgroundColorChanger(urlEnding);
     }else{
-        console.log('new value');
         //if the URL does not match any entry, then push this URL into the array wtih appropriate colors
         urlPusher(i, urlEnding)
         localStorage.setItem(`${bgColorOptions.LOCAL_STORAGE_KEY}ChatIdsObject`, JSON.stringify(storedChatIdsArray));
-        console.log(storedChatIdsArray);
         i<2 ? i++ : i=0;
         backgroundColorChanger(urlEnding);
     }
 }
+
+//function to push new local storage entry into array
 function urlPusher(i, urlEnding){
     if(i == 0){
         storedChatIdsArray.push({url:`${urlEnding}`, color:`${bgColorOptions.color1}`, colorID: `${i}`})
@@ -89,50 +79,80 @@ function urlPusher(i, urlEnding){
     }
 }
 
+//funtion to change bg color based on local storage entries
 function backgroundColorChanger(urlEnding){
-    console.log(urlEnding);
     const buttonContainer = document.querySelector('.chat__current-chat');
     const arrayElement = storedChatIdsArray.find( ({ url }) => url === urlEnding );
-    console.log(arrayElement)
     buttonContainer.style.background = arrayElement.color;
 }
 
-//https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
-window.onload = function() { // same as window.addEventListener('load', (event) => {
+//function to wait for plugin area to load
+function waitForElement(id, callback){
+    var repeatingFunction = setInterval(function(){
+        if(document.getElementById(id)){
+            clearInterval(repeatingFunction);
+            callback();
+        }
+    }, 100);
+}
+
+//function to wait for chat area to load after initially beginning chat session
+function waitForElementByClassname(callback){
+    var repeatingFunction = setInterval(function(){
+        if(document.querySelector('.chat').children[1]){
+            clearInterval(repeatingFunction);
+            callback();
+        }
+    }, 100);
+}
+
+// on window load add listener to document testing for button click on initial sessino start modal
+window.onload = function(){
     const pathOnLoad = location.pathname.split('/');
     if (pathOnLoad[1] === 'chat' && pathOnLoad[2]) {
-        document.addEventListener( "click", someListener );
+        document.addEventListener( "click", buttonListener );
     }
   };
 
-
-//here you are waiting for when someone clicks the modal button.  Then the mutation observation starts to see when a childList change occurs.  Then the URLArrayTester begins.
-function someListener(event){
+//function to add buttons to plugin area
+function buttonListener(event){
     var element = event.target;
     if(element.tagName == 'BUTTON'){
-    const targetNode = document.querySelector('.chat');
+        waitForElementByClassname(urlArrayTester);
+        waitForElement("chat-plugin-1", function(){
+            const chatPlugin1 = document.querySelector("#chat-plugin-1")
+            const plugin1Title = document.createElement("div");
+            plugin1Title.textContent = "BG Color Select";
+            chatPlugin1.append(plugin1Title);
+            const buttonTitles = [
+                { title: 'Color 1', value: bgColorOptions.color1 },
+                { title: 'Color 2', value: bgColorOptions.color2 },
+                { title: 'Color 3', value: bgColorOptions.color3 }
+            ];
+            const nodes = buttonTitles.map(item => {
+                const button = document.createElement('button');
+                button.value = item.value;
+                button.onclick = buttonClickBackgroundChange;
+                button.setAttribute("style", `background: ${item.value}; border-radius: 50%; height: 25px; width: 25px;`)
+                return button;
+            });
+            chatPlugin1.append(...nodes);
+        });
 
-    // bgColorOptions for the observer (which mutations to observe)
-    const config = { attributes: true, childList: true, subtree: true };
-
-    // Callback function to execute when mutations are observed
-    const callback = function(mutationsList, observer) {
-        console.log(mutationsList);
-        // Use traditional 'for loops' for IE 11
-        for(const mutation of mutationsList) {
-            if (mutation.addedNodes[0].classList.contains("chat__chat-panels")) {
-                urlArrayTester();
-                observer.disconnect();
-                document.removeEventListener( "click", someListener );
-                return;
-            }
-        }
-    };
-    // Create an observer instance linked to the callback function
-    const observer = new MutationObserver(callback);
-
-    // Start observing the target node for configured mutations
-    observer.observe(targetNode, config);
+        document.removeEventListener( "click", buttonListener );
+        return;
     }
 }
+
+//Function to change BG color and update local storage on click of plugin button
+function buttonClickBackgroundChange(){
+    const path = window.location.pathname.split('/');
+    const urlEnding = path[path.length-1];
+    const buttonContainer = document.querySelector('.chat__current-chat');
+    buttonContainer.style.background = this.value;
+    const currentLocalStorageColorIndex = storedChatIdsArray.findIndex(element => element.url == urlEnding);
+    storedChatIdsArray[currentLocalStorageColorIndex].color = this.value;
+    localStorage.setItem(`${bgColorOptions.LOCAL_STORAGE_KEY}ChatIdsObject`, JSON.stringify(storedChatIdsArray));
+}
+
 })();
