@@ -17,9 +17,10 @@
 const bgColorOptions = {
     LOCAL_STORAGE_KEY: 'bgc', // Locale storage key prefix
     STORAGE_FLUSH_INTERVAL_MS: 86400000, // 24 hours
-    color1: "linear-gradient(to right, #d9a7c7, #fffcdc)",
-    color2: "linear-gradient(to right, #06beb6, #48b1bf)",
-    color3: "linear-gradient(to right, #1c92d2, #f2fcfe)",
+    PLUGIN_TITLE: "BG Color Select",
+    color1: "linear-gradient(to right top, #31bbda 20%, #35394b 20%)",
+    color2: "linear-gradient(to right top, #ce635b 20%, #35394b 20%)",
+    color3: "linear-gradient(to right top, #63d9b0 20%, #35394b 20%)",
 };
 
 // on window load test local storage and update bg color if necessary
@@ -120,9 +121,11 @@ function buttonListener(event){
     if(element.tagName == 'BUTTON'){
         waitForElementByClassname(urlArrayTester);
         waitForElement("chat-plugin-1", function(){
-            const chatPlugin1 = document.querySelector("#chat-plugin-1")
+            const pluginFontColor = document.querySelector('.chat-toolbar__menu-item:not(.is-selected');
+            const chatPlugin1 = document.querySelector("#chat-plugin-1");
             const plugin1Title = document.createElement("div");
-            plugin1Title.textContent = "BG Color Select";
+            plugin1Title.textContent = bgColorOptions.PLUGIN_TITLE;
+            plugin1Title.setAttribute("style", `color: ${getComputedStyle(pluginFontColor).color};`)
             chatPlugin1.append(plugin1Title);
             const buttonTitles = [
                 { title: 'Color 1', value: bgColorOptions.color1 },
