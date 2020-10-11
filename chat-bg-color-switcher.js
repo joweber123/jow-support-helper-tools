@@ -16,12 +16,17 @@
 // Script bgColorOptions - Customize Me!
 const bgColorOptions = {
     LOCAL_STORAGE_KEY: 'bgc', // Locale storage key prefix
-    STORAGE_FLUSH_INTERVAL_MS: 86400000, // 24 hours
-    PLUGIN_TITLE: "BG Color Select",
-    color1: "linear-gradient(to right top, #31bbda 20%, #35394b 20%)",
-    color2: "linear-gradient(to right top, #ce635b 20%, #35394b 20%)",
-    color3: "linear-gradient(to right top, #63d9b0 20%, #35394b 20%)",
-    randomFormula: "linear-gradient(to right top, random 20%, #35394b 20%)"
+    STORAGE_FLUSH_INTERVAL_MS: 86400000, // 12 hours
+    PLUGIN_TITLE: "BG Color Select", // Title that will be added to Plugin area
+    randomAlways: 'false', // Set to true if you would like a random color to always be selected
+    randomButton: 'true', // Set to true if you would like a button to randomize colors on click
+    randomFormula: "linear-gradient(to right top, random 20%, random 20%)", //Set random forumla here.  You can use the word "random" in any CSS background style and a random color will be set
+    colors: [
+        "linear-gradient(to right top, #31bbda 20%, #35394b 20%)", //Default colors to add use as backgrounds.  You can set as many as you would like
+        "linear-gradient(to right top, #ce635b 20%, #35394b 20%)",
+        "linear-gradient(to right top, #63d9b0 20%, #35394b 20%)"
+    ]
+
 };
 
 // on window load test local storage and update bg color if necessary
@@ -39,32 +44,28 @@ history.pushState = function () {
     urlArrayTester();
 };
 
-
 //if array of chats does not exist, set to empty array.  If exists, set to local storage
 let storedChatIdsArray = JSON.parse(localStorage.getItem(`${bgColorOptions.LOCAL_STORAGE_KEY}ChatIdsObject`)) || [];
 
 //check if array is empty or not
 if (Array.isArray(storedChatIdsArray) &&storedChatIdsArray.length){
-    console.log(storedChatIdsArray);
+    //remove items following storage flush time setting
     storedChatIdsArray = storedChatIdsArray.filter(item => (Date.now() < (parseInt(item.timeStamp) + bgColorOptions.STORAGE_FLUSH_INTERVAL_MS)));
-    console.log(storedChatIdsArray);
-    //remove if the timestamp of the element is greater than the the current date minus 24 hours
+
 }
 
-
 //set iterator to 0 by default.  If there is a stored array, begin to iterate
-let i = 0;
+let i = 1;
 if (storedChatIdsArray.length == 0){
-    i = 0;
+    i = 1;
 }else{
-    i = storedChatIdsArray[storedChatIdsArray.length - 1].originalColorID;
+    i = storedChatIdsArray[storedChatIdsArray.length-1].originalColorID;
 }
 
 //function to test if local storage entry exists or not and then add new entry if needed
 function urlArrayTester(){
     const path = window.location.pathname.split('/');
     const urlEnding = path[path.length-1];
-
     //testing to see the current chat ID matches any IDs that are saved in the array
     const urlEndingCheck = storedChatIdsArray.some(e => e.url == urlEnding);
     if(urlEndingCheck){
@@ -74,19 +75,18 @@ function urlArrayTester(){
         //if the URL does not match any entry, then push this URL into the array wtih appropriate colors
         urlPusher(i, urlEnding)
         localStorage.setItem(`${bgColorOptions.LOCAL_STORAGE_KEY}ChatIdsObject`, JSON.stringify(storedChatIdsArray));
-        i<2 ? i++ : i=0;
+        i<(bgColorOptions.colors.length) ? i++ : i=1;
         backgroundColorChanger(urlEnding);
     }
 }
 
 //function to push new local storage entry into array
 function urlPusher(i, urlEnding){
-    if(i == 0){
-        storedChatIdsArray.push({url:`${urlEnding}`, color:`${bgColorOptions.color1}`, originalColorID: `${i}`, timeStamp: `${Date.now()}`})
-    }else if(i == 1){
-        storedChatIdsArray.push({url:`${urlEnding}`, color:`${bgColorOptions.color2}`, originalColorID: `${i}`, timeStamp: `${Date.now()}`})
+    if(bgColorOptions.randomAlways === 'true'){
+        storedChatIdsArray.push({url:`${urlEnding}`, color:`${changeRandomFunction(bgColorOptions.randomFormula, 'random')}`, originalColorID: `${i}`, timeStamp: `${Date.now()}`})
+
     }else{
-        storedChatIdsArray.push({url:`${urlEnding}`, color:`${bgColorOptions.color3}`, originalColorID: `${i}`, timeStamp: `${Date.now()}`})
+        storedChatIdsArray.push({url:`${urlEnding}`, color:`${bgColorOptions.colors[i-1]}`, originalColorID: `${i}`, timeStamp: `${Date.now()}`})
     }
 }
 
@@ -127,6 +127,7 @@ window.onload = function(){
   function randomColor() {
     return Math.floor(Math.random()*16777215).toString(16);
   }
+
 //function to add buttons to plugin area
 function buttonListener(event){
     var element = event.target;
@@ -139,45 +140,56 @@ function buttonListener(event){
             plugin1Title.textContent = bgColorOptions.PLUGIN_TITLE;
             plugin1Title.setAttribute("style", `color: ${getComputedStyle(pluginFontColor).color};`)
             chatPlugin1.append(plugin1Title);
-            const buttonTitles = [
-                { value: bgColorOptions.color1 },
-                { value: bgColorOptions.color2 },
-                { value: bgColorOptions.color3 },
-                { value: 'randomize' }
-            ];
-            const nodes = buttonTitles.map(item => {
-                const button = document.createElement('button');
-                button.value = item.value;
-                button.className = "plugin-bg-color-swab";
-                button.onclick = buttonClickBackgroundChange;
-                if (item.value == 'randomize'){
-                    button.setAttribute("style", `background: red; border-radius: 50%; height: 25px; width: 25px;`)
-                    button.animate([
-                        { background: 'violet'},
-                        { background: 'indigo'},
-                        { background: 'blue' },
-                        { background: 'green' },
-                        { background: 'yellow' },
-                        { background: 'orange'},
-                        { background: 'red'},
-                        { background: 'violet'}
-                    ],{
-                        duration: 5000,
-                        iterations: Infinity
-                    });
-                }else{
-                    button.setAttribute("style", `background: ${item.value}; border-radius: 50%; height: 25px; width: 25px;`)
-                }
-                return button;
-            });
-            chatPlugin1.append(...nodes);
-        });
 
+            // Add default color selector buttons
+            if(bgColorOptions.randomAlways === 'false'){
+                const nodes = bgColorOptions.colors.map(item => {
+                    const button = document.createElement('button');
+                    button.value = item;
+                    button.className = "plugin-bg-color-swab";
+                    button.onclick = buttonClickBackgroundChange;
+                    button.setAttribute("style", `background: ${item}; border-radius: 50%; height: 25px; width: 25px;`)
+                    return button;
+                });
+                chatPlugin1.append(...nodes);
+            }
+
+            // Add random select button
+            if (bgColorOptions.randomButton === 'true'){
+                const randomButton = document.createElement('button');
+                randomButton.className = "plugin-bg-color-swab";
+                randomButton.onclick = buttonClickBackgroundChange;
+                randomButton.value = 'randomize';
+                randomButton.setAttribute("style", `background: red; border-radius: 50%; height: 25px; width: 25px;`)
+                randomButton.animate([
+                    { background: 'violet'},
+                    { background: 'indigo'},
+                    { background: 'blue' },
+                    { background: 'green' },
+                    { background: 'yellow' },
+                    { background: 'orange'},
+                    { background: 'red'},
+                    { background: 'violet'}
+                ],{
+                    duration: 5000,
+                    iterations: Infinity
+                });
+                chatPlugin1.append(randomButton);
+            }
+        });
         document.removeEventListener( "click", buttonListener );
         return;
     }
 }
 
+//Function to strip the word random from string and replace it with a random color
+const changeRandomFunction = (string, oldPart) => {
+    if (string.includes(oldPart) === false) {
+      return string;
+    }
+    const newString = string.replace(oldPart, `#${randomColor()}`)
+    return changeRandomFunction (newString, oldPart)
+  }
 
 //Function to change BG color and update local storage on click of plugin button
 function buttonClickBackgroundChange(){
@@ -187,13 +199,6 @@ function buttonClickBackgroundChange(){
     const currentLocalStorageColorIndex = storedChatIdsArray.findIndex(element => element.url == urlEnding);
     if(this.value == 'randomize'){
         if(bgColorOptions.hasOwnProperty('randomFormula')){
-            const changeRandomFunction = (string, oldPart) => {
-                if (string.includes(oldPart) === false) {
-                  return string;
-                }
-                const newString = string.replace(oldPart, `#${randomColor()}`)
-                return changeRandomFunction (newString, oldPart)
-              }
             const randomFormulaUpdated = changeRandomFunction(bgColorOptions.randomFormula, 'random');
             buttonContainer.style.background = randomFormulaUpdated;
             storedChatIdsArray[currentLocalStorageColorIndex].color =randomFormulaUpdated;
@@ -205,7 +210,6 @@ function buttonClickBackgroundChange(){
         buttonContainer.style.background = this.value;
         storedChatIdsArray[currentLocalStorageColorIndex].color = this.value;
     }
-
     localStorage.setItem(`${bgColorOptions.LOCAL_STORAGE_KEY}ChatIdsObject`, JSON.stringify(storedChatIdsArray));
 }
 
