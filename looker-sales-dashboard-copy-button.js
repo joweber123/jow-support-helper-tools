@@ -6,7 +6,7 @@
 // @author       joweber123
 // @match        https://looker.a8c.com/dashboards/1713*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=a8c.com
-// @downloadURL  https://github.com/joweber123/jow-support-helper-tools/tree/main/looker-sales-dashboard-copy-button.js
+// @downloadURL  https://github.com/joweber123/jow-support-helper-tools/raw/main/looker-sales-dashboard-copy-button.js
 // @grant        none
 // ==/UserScript==
 
